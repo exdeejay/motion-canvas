@@ -1,5 +1,6 @@
 import {
   cloneable,
+  compound,
   computed,
   initial,
   inspectable,
@@ -39,6 +40,7 @@ import {Node, NodeProps} from './Node';
 import {drawLine, lineTo} from '../utils';
 import {spacingSignal} from '../decorators/spacingSignal';
 import {
+  CompoundSignal,
   createSignal,
   SignalValue,
   SimpleSignal,
@@ -144,15 +146,25 @@ export class Layout extends Node {
   @initial('normal')
   @signal()
   public declare readonly alignItems: SimpleSignal<FlexAlign, this>;
-  @initial(null)
-  @signal()
-  public declare readonly gap: SimpleSignal<Length, this>;
-  @initial(null)
-  @signal()
-  public declare readonly rowGap: SimpleSignal<Length, this>;
-  @initial(null)
-  @signal()
-  public declare readonly columnGap: SimpleSignal<Length, this>;
+
+  @compound({ row: 'rowGap', column: 'columnGap' })
+  public declare readonly gap: CompoundSignal<PossiblePair<Length, 'row' | 'column'>, Pair<Length, 'row' | 'column'>, 'row' | 'column', this>;
+
+  protected getRowGap() {
+    return this.gap.row();
+  }
+
+  protected setRowGap(value: SignalValue<number>) {
+    this.gap.row(value);
+  }
+
+  protected getColumnGap() {
+    return this.gap.column();
+  }
+
+  protected setColumnGap(value: SignalValue<number>) {
+    this.gap.column(value);
+  }
 
   @initial(null)
   @signal()
